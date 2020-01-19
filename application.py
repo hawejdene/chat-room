@@ -74,15 +74,15 @@ def chat():
 @app.route("/logout", methods=['GET', 'POST'])
 def logout():
     logout_user()
-    flash('logout success', 'success')
-    return 'eee'
+    flash('You have logged out successfully', 'success')
+    return redirect(url_for('login'))
 
 
 @socketio.on('message')
 def message(data):
     #send(data)
 
-    send({"username": data['username'], "msg": data['msg']},   room = data["room"])
+    send({"username": data['username'], "msg": data['msg']}, room=data['room'])
 
 @socketio.on('join')
 def on_join(data):
