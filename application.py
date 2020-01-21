@@ -110,6 +110,7 @@ def message(data):
     room = data['room']
     msg = {"msg": data['msg'], "username": data['username']}
     newRoom2 = room.split('_')[1] + '_' + room.split('_')[0]
+    userRoom = room.split('_')[1] + '_' + room.split('_')[1]
     if not messages or (room not in messages) or (newRoom2 not in messages):
         messages[room] = []
         messages[newRoom2] = []
@@ -121,7 +122,7 @@ def message(data):
 
     send({"username": data['username'], "msg": data['msg'], 'all_messages': messages[room]}, room=room)
     send({"username": data['username'], "msg": data['msg'], 'all_messages': messages[room]}, room=newRoom2)
-    emit('notification', {"from": room.split('_')[0], "msg": "new message", 'clients': clients}, room=room.split('_')[1]+'_'+room.split('_')[1])
+    emit('notification', {"from": room.split('_')[0], "msg": "new message", 'clients': clients}, room=userRoom)
 
 
 @socketio.on('join-user')

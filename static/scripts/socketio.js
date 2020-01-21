@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     //new message
       socket.on('notification', data => {
-         console.log(data)
+         console.log("notification",data)
     });
     // Display all incoming messages
     socket.on('message', data => {
