@@ -17,7 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     //new message
       socket.on('notification', data => {
-         console.log("notification",data)
+         console.log("notification",data);
+            const p = document.getElementById('p_'+data.from);
+            const span = document.createElement('span');
+            span.setAttribute("class","badge" );
+            span.setAttribute("id","bd_"+data.from );
+            span.innerHTML = 3;
+            p.append(span);
+
+
     });
     // Display all incoming messages
     socket.on('message', data => {
@@ -68,12 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#sidebar').innerHTML = "";
         for(var i = 0; i < data.clients.length; i++) {
             const p = document.createElement('p');
-            p.setAttribute("class", "select-room cursor-pointer");
-              p.setAttribute("id", data.clients[i]);
-            p.innerHTML += data.clients[i];
-            p.addEventListener("click", function() {
-                console.log(p.innerHTML);
-                sendMessageTo(p.innerHTML)
+            const span = document.createElement('span');
+            p.setAttribute("class", "notification select-room cursor-pointer");
+            p.setAttribute("id", 'p_'+data.clients[i]);
+            span.setAttribute("id", data.clients[i]);
+            span.innerHTML = data.clients[i];
+            p.append(span);
+            span.addEventListener("click", function() {
+                sendMessageTo(span.innerHTML)
             });
             document.querySelector('#sidebar').append(p);
         }
@@ -84,11 +94,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#sidebar').innerHTML = "";
         for(var i = 0; i < data.clients.length; i++) {
             const p = document.createElement('p');
-            p.setAttribute("class", "select-room cursor-pointer");
-            p.setAttribute("id", data.clients[i]);
-            p.innerHTML += data.clients[i];
-             p.addEventListener("click", function() {
-                console.log(p.innerHTML);
+            const span = document.createElement('span');
+            p.setAttribute("class", "notification select-room cursor-pointer");
+            p.setAttribute("id", 'p_'+data.clients[i])
+             span.setAttribute("id", data.clients[i]);
+             span.innerHTML = data.clients[i];
+            p.append(span);
+             span.addEventListener("click", function() {
+                sendMessageTo(span.innerHTML);
             });
             document.querySelector('#sidebar').append(p);
         }
@@ -123,10 +136,16 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.select-room').forEach(p => {
             p.style.color = "black";
         });
+          //remove notfication
+            const span = document.getElementById("bd_"+user);
+            if (span){
+            span.parentNode.removeChild(span);
+            }
+
 
           // Highlight selected room
-        document.querySelector('#' + CSS.escape(user)).style.color = "#ffc107";
-        document.querySelector('#' + CSS.escape(user)).style.backgroundColor = "white";
+        document.querySelector('#' + CSS.escape('p_'+user)).style.color = "#ffc107";
+        document.querySelector('#' + CSS.escape('p_'+user)).style.backgroundColor = "white";
 
         // Clear message area
         document.querySelector('#display-message-section').innerHTML = '';
