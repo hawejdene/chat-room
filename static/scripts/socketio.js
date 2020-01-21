@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Set default room
     let room = username + "_" + username;
+    let destination = username;
 
 
     socket.on('connect', function () {
@@ -120,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#send_message').onclick = () => {
         console.log("send to room", room);
         socket.emit('message', {'msg': document.querySelector('#user_message').value,
-            'username': username, 'room': room});
+            'username': username, 'destination': destination, 'room': room});
 
         document.querySelector('#user_message').value = '';
     };
@@ -133,14 +134,21 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
 
+   function checkRoom(user1, user2) {
+      if(user1 > user2){
+          return user1 + '_' + user2
+      }else {
+          return user2 + '_' + user1
+      }
+   }
 
     function sendMessageTo(user) {
         console.log("to ", user);
         socket.emit('join-user', {
             'username': username, 'to': user, 'room': user});
 
-             room = username + '_' + user;
-
+             room = checkRoom(username,user);
+             destination = user;
             document.querySelectorAll('.select-room').forEach(p => {
             p.style.color = "black";
         });

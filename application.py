@@ -20,6 +20,7 @@ db = SQLAlchemy(app)
 socketio = SocketIO(app)
 
 clients = []
+rooms = []
 messages = {}
 # configure login
 login = LoginManager(app)
@@ -86,8 +87,6 @@ def connect(data):
     join_room(room)
     if username not in clients:
         clients.append(username)
-    print('clients')
-    print(clients)
     # Broadcast that new user has joined
     emit('new-user', {'username': username, 'room': room, 'clients': clients}, broadcast=True)
 
@@ -98,8 +97,6 @@ def connect(data):
     room = data["room"]
     if username in clients:
         clients.remove(current_user.username)
-    print('leaveee')
-    print(clients)
     # Broadcast that new user has left
     emit('leave-user', {'username': username, 'room': room, 'clients': clients}, broadcast=True)
 
@@ -108,21 +105,22 @@ def connect(data):
 def message(data):
     print(data)
     room = data['room']
+    destination = ''
+    if 'destination' in data:
+        destination = data['destination']
     msg = {"msg": data['msg'], "username": data['username']}
-    newRoom2 = room.split('_')[1] + '_' + room.split('_')[0]
-    userRoom = room.split('_')[1] + '_' + room.split('_')[1]
-    if not messages or (room not in messages) or (newRoom2 not in messages):
+    # newRoom2 = room.split('_')[1] + '_' + room.split('_')[0]
+    userRoom = destination + '_' + destination
+    if not messages or (room not in messages):
         messages[room] = []
-        messages[newRoom2] = []
         messages[room].append(msg)
-        messages[newRoom2].append(msg)
     else:
         messages[room].append(msg)
-        messages[newRoom2].append(msg)
 
-    send({"username": data['username'], "msg": data['msg'], 'all_messages': messages[room]}, room=room)
-    send({"username": data['username'], "msg": data['msg'], 'all_messages': messages[room]}, room=newRoom2)
-    emit('notification', {"from": room.split('_')[0], "room": room, "room2": newRoom2, "msg": "new message", 'clients': clients}, room=userRoom)
+    send({"username": data['username'], "msg": data['msg'], 'all_messages': messages[room], 'room': room}, room=room)
+    emit('notification',
+         {"from": data['username'], "room": room, "room2": room, "msg": "new message", 'clients': clients},
+         room=userRoom)
 
 
 @socketio.on('join-user')
@@ -130,10 +128,20 @@ def message(data):
     # user join room user_userTo
     user = data["username"]
     userTo = data["to"]
-    newRoom = user + '_' + userTo
+    newRoom = checkRoom(user, userTo)
     join_room(newRoom)
     if newRoom in messages:
         send({"username": data['username'], "msg": "load message", 'all_messages': messages[newRoom]}, room=newRoom)
+
+
+def checkRoom(user1, user2):
+    print(user1, user2)
+    print(user1 > user2)
+    if user1 > user2:
+        newRoom = user1 + '_' + user2
+    else:
+        newRoom = user2 + '_' + user1
+    return newRoom
 
 
 if __name__ == "__main__":
