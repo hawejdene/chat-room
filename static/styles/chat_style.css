@@ -168,3 +168,10 @@ input[type=text]:focus{
   background: red;
   color: white;
 }
+
+.dropdown-left-manual {
+  right: 0;
+  left: auto;
+  padding-left: 1px;
+  padding-right: 1px;
+}
