@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_login import login_user, current_user, login_required, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from passlib.hash import pbkdf2_sha256
@@ -20,6 +20,7 @@ db = SQLAlchemy(app)
 socketio = SocketIO(app)
 
 ROOMS = ["lounge", "news", "games", "coding"]
+clients = []
 # configure login
 login = LoginManager(app)
 login.init_app(app)
@@ -68,7 +69,7 @@ def chat():
     if not current_user.is_authenticated:
         flash(' please login', 'danger')
         # return redirect(url_for('login'))
-    return render_template("chat.html", username=current_user.username, rooms=ROOMS)
+    return render_template("chat.html", username=current_user.username, rooms=ROOMS, clients=clients)
 
 
 @app.route("/logout", methods=['GET', 'POST'])
@@ -78,11 +79,39 @@ def logout():
     return redirect(url_for('login'))
 
 
+@socketio.on('connect-user')
+def connect(data):
+    username = data["username"]
+    room = data["room"]
+    join_room(room)
+    if username not in clients:
+        clients.append(username)
+    print('clients')
+    print(clients)
+    # Broadcast that new user has joined
+    emit('new-user', {'username': username, 'room': room, 'clients': clients},  room=data['room'])
+    send({"msg": username + " has joined the " + room + " room."}, room=room)
+
+
+@socketio.on('leave-app')
+def connect(data):
+    username = data["username"]
+    room = data["room"]
+    if username in clients:
+        clients.remove(current_user.username)
+    print('leaveee')
+    print(clients)
+    # Broadcast that new user has joined
+    emit('leave-user', {'username': username, 'room': room, 'clients': clients},room=data['room'])
+
+
+
 @socketio.on('message')
 def message(data):
-    #send(data)
-
+    # send(data)
+    print(data)
     send({"username": data['username'], "msg": data['msg']}, room=data['room'])
+
 
 @socketio.on('join')
 def on_join(data):
@@ -104,6 +133,7 @@ def on_leave(data):
     room = data['room']
     leave_room(room)
     send({"msg": username + " has left the room"}, room=room)
+
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)

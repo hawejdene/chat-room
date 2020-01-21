@@ -8,8 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Set default room
     let room = "Lounge"
-    joinRoom("Lounge");
 
+
+    socket.on('connect', function () {
+         socket.emit('connect-user', {'username': username, 'room': room});
+    });
     // Send messages
     document.querySelector('#send_message').onclick = () => {
         socket.emit('message', {'msg': document.querySelector('#user_message').value,
@@ -20,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Display all incoming messages
     socket.on('message', data => {
-
+        console.log(data)
         // Display current message
         if (data.msg) {
             const p = document.createElement('p');
@@ -73,6 +76,28 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollDownChatWindow();
     });
 
+    socket.on('new-user', data =>{
+        console.log("new ", data)
+        document.querySelector('#sidebar').innerHTML = "";
+        for(var i = 0; i < data.clients.length; i++) {
+            const p = document.createElement('p');
+            p.setAttribute("class", "select-room cursor-pointer");
+            p.innerHTML += data.clients[i];
+            document.querySelector('#sidebar').append(p);
+        }
+    });
+    socket.on('leave-user', data => {
+        console.log("leave", data)
+        document.querySelector('#sidebar').innerHTML = "";
+        for(var i = 0; i < data.clients.length; i++) {
+            const p = document.createElement('p');
+            p.setAttribute("class", "select-room cursor-pointer");
+            p.innerHTML += data.clients[i];
+            document.querySelector('#sidebar').append(p);
+        }
+    })
+
+
     // Select a room
     document.querySelectorAll('.select-room').forEach(p => {
         p.onclick = () => {
@@ -91,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Logout from chat
     document.querySelector("#logout-btn").onclick = () => {
-        leaveRoom(room);
+        socket.emit('leave-app', {'username': username, 'room': room});
     };
 
     // Trigger 'leave' event if user was previously on a room
