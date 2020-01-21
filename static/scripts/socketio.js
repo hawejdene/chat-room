@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const span = document.createElement('span');
             span.setAttribute("class","badge" );
             span.setAttribute("id","bd_"+data.from );
-            span.innerHTML = 3;
+            span.innerHTML = 1;
             p.append(span);
 
 
