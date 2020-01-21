@@ -19,8 +19,8 @@ db = SQLAlchemy(app)
 # initialze flask socketIo
 socketio = SocketIO(app)
 
-ROOMS = ["lounge", "news", "games", "coding"]
 clients = []
+messages = {}
 # configure login
 login = LoginManager(app)
 login.init_app(app)
@@ -31,13 +31,13 @@ def load_user(id):
     return User.query.get(int(id))
 
 
-@app.route("/", methods=['GET', 'POST'])
-def index():
+@app.route("/register", methods=['GET', 'POST'])
+def register():
     reg_form = RegistrationForm()
-    if reg_form.validate_on_submit():
+    print(reg_form.username.data)
+    if reg_form.username.data and reg_form.password.data:
         username = reg_form.username.data
         password = reg_form.password.data
-
         # hask passwd
         hashed_pswd = pbkdf2_sha256.hash(password)
 
@@ -69,7 +69,7 @@ def chat():
     if not current_user.is_authenticated:
         flash(' please login', 'danger')
         # return redirect(url_for('login'))
-    return render_template("chat.html", username=current_user.username, rooms=ROOMS, clients=clients)
+    return render_template("chat.html", username=current_user.username, clients=clients)
 
 
 @app.route("/logout", methods=['GET', 'POST'])
@@ -89,7 +89,7 @@ def connect(data):
     print('clients')
     print(clients)
     # Broadcast that new user has joined
-    emit('new-user', {'username': username, 'room': room, 'clients': clients},  room=data['room'])
+    emit('new-user', {'username': username, 'room': room, 'clients': clients}, room=data['room'])
     send({"msg": username + " has joined the " + room + " room."}, room=room)
 
 
@@ -102,15 +102,61 @@ def connect(data):
     print('leaveee')
     print(clients)
     # Broadcast that new user has joined
-    emit('leave-user', {'username': username, 'room': room, 'clients': clients},room=data['room'])
-
+    emit('leave-user', {'username': username, 'room': room, 'clients': clients}, room=data['room'])
 
 
 @socketio.on('message')
 def message(data):
     # send(data)
     print(data)
-    send({"username": data['username'], "msg": data['msg']}, room=data['room'])
+    room = data['room']
+    msg = {"msg": data['msg'], "username": data['username']}
+    newRoom2 = room.split('_')[1] + '_' + room.split('_')[0]
+    print("mesgaf room ", messages)
+    if not messages:
+        print("is noooooooo", messages)
+        messages[room] = []
+        messages[newRoom2] = []
+        messages[room].append(msg)
+        messages[newRoom2].append(msg)
+    elif (room not in messages) or (newRoom2 not in messages):
+        print("is noooooooo", messages)
+        messages[room] = []
+        messages[newRoom2] = []
+        messages[room].append(msg)
+        messages[newRoom2].append(msg)
+    else:
+        print("not nuuuuull", messages)
+        messages[room].append(msg)
+        messages[newRoom2].append(msg)
+
+    send({"username": data['username'], "msg": data['msg'], 'all_messages': messages[room]}, room=data['room'])
+    send({"username": data['username'], "msg": data['msg'], 'all_messages': messages[room]}, room=newRoom2)
+    emit('notification',{"username": data['username'], "msg": data['msg'], 'all_messages': messages[room]}, room=newRoom2)
+
+
+@socketio.on('join-user')
+def message(data):
+    # user join room user_userTo
+    print("sendto")
+    print(data)
+    user = data["username"]
+    userTo = data["to"]
+    newRoom = user + '_' + userTo
+    join_room(newRoom)
+    # store message in messages[user_userTo]
+    # send notification to userTo
+
+    send({"msg": " new message form " + user + " to " + userTo}, broadcast=True)
+    pass
+
+
+@socketio.on('messageTo')
+def message(data):
+    # user join room user_userTo
+    # store message in messages[user_userTo]
+    # send notification to userTo
+    pass
 
 
 @socketio.on('join')
