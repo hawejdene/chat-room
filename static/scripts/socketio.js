@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("new ", data)
         document.querySelector('#sidebar').innerHTML = "";
         for(var i = 0; i < data.clients.length; i++) {
+            if(data.clients[i] !==username){
             const p = document.createElement('p');
             const span = document.createElement('span');
             p.setAttribute("class", "notification select-room cursor-pointer");
@@ -88,6 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 sendMessageTo(span.innerHTML)
             });
             document.querySelector('#sidebar').append(p);
+            }
+
         }
     });
 
@@ -95,7 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("leave", data)
         document.querySelector('#sidebar').innerHTML = "";
         for(var i = 0; i < data.clients.length; i++) {
-            const p = document.createElement('p');
+            if(data.clients[i] !== username){
+                    const p = document.createElement('p');
             const span = document.createElement('span');
             p.setAttribute("class", "notification select-room cursor-pointer");
             p.setAttribute("id", 'p_'+data.clients[i])
@@ -106,6 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 sendMessageTo(span.innerHTML);
             });
             document.querySelector('#sidebar').append(p);
+            }
+
         }
     });
 
