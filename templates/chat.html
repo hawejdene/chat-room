@@ -15,6 +15,7 @@
     </head>
 
     <body>
+    <span >{{ username }}</span>
         <!-- Flash error messages -->
         {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -40,6 +41,9 @@
                         <ul class="navbar-nav ml-auto">
                             <li class="nav-item">
                                 <a id="logout-btn" class="nav-link" href="{{ url_for('logout') }}"><span style="color: #335177">Logout</span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a id="" class="nav-link" href="#"><span style="color: #335177">{{username}}</span></a>
                             </li>
                         </ul>
                     </div>
