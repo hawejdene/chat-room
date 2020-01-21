@@ -122,7 +122,7 @@ def message(data):
 
     send({"username": data['username'], "msg": data['msg'], 'all_messages': messages[room]}, room=room)
     send({"username": data['username'], "msg": data['msg'], 'all_messages': messages[room]}, room=newRoom2)
-    emit('notification', {"from": room.split('_')[0], "msg": "new message", 'clients': clients}, room=userRoom)
+    emit('notification', {"from": room.split('_')[0], "room": room, "room2": newRoom2, "msg": "new message", 'clients': clients}, room=userRoom)
 
 
 @socketio.on('join-user')

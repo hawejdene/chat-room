@@ -18,14 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
     //new message
       socket.on('notification', data => {
          console.log("notification",data);
-            const p = document.getElementById('p_'+data.from);
+         console.log(room)
+          console.log(room == data.room2)
+         if (room !== data.room && room !== data.room2 ){
+             const p = document.getElementById('p_'+data.from);
             const span = document.createElement('span');
             span.setAttribute("class","badge" );
             span.setAttribute("id","bd_"+data.from );
             span.innerHTML = 1;
             p.append(span);
-
-
+         }
     });
     // Display all incoming messages
     socket.on('message', data => {
