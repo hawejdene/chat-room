@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     socket.on('connect', function () {
+        console.log("gen keys");
+        generateKeys();
          socket.emit('connect-user', {'username': username, 'room': room});
     });
     //new message
@@ -106,49 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-    /* socket.on('message', data => {
-        console.log('receivre', data);
-        if (data.all_messages) {
-           document.querySelector('#display-message-section').innerHTML = '';
-            for(var i = 0; i < data.all_messages.length; i++) {
-            const p = document.createElement('p');
-            const span_username = document.createElement('span');
-            const br = document.createElement('br');
-            // Display user's own message
-            if (data.all_messages[i].username == username) {
-                console.log("te")
-                    p.setAttribute("class", "my-msg");
-
-                    // Username
-                    span_username.setAttribute("class", "my-username");
-                    span_username.innerText = data.all_messages[i].username;
-
-                    // HTML to append
-                    p.innerHTML += span_username.outerHTML + br.outerHTML + data.all_messages[i].msg + br.outerHTML;
-
-                    //Append
-                    document.querySelector('#display-message-section').append(p);
-            }
-            // Display other users' messages
-            else {
-                p.setAttribute("class", "others-msg");
-
-                // Username
-                span_username.setAttribute("class", "other-username");
-                span_username.innerText = data.all_messages[i].username;
-
-                // HTML to append
-                p.innerHTML += span_username.outerHTML + br.outerHTML + data.all_messages[i].msg + br.outerHTML ;
-
-                //Append
-                document.querySelector('#display-message-section').append(p);
-            }
-        }
-       }   else {
-                printSysMsg(data.msg);
-            }
-        scrollDownChatWindow();
-    });  */
 
     socket.on('new-user', data =>{
         populateClients(data)
@@ -228,6 +187,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Autofocus on text box
         document.querySelector("#user_message").focus();
+    }
+
+      function generateKeys() {
+      const keySize = 2048;
+      const crypt = new JSEncrypt({default_key_size: keySize});
+
+      crypt.getKey();
+      console.log("public key: ",crypt.getPrivateKey());
+      console.log("private key: ", crypt.getPrivateKey());
+
+    }
+
+     function encrypt(msg, pubKey) {
+      const encrypt = new JSEncrypt();
+      encrypt.setPublicKey(pubKey);
+      const result = encrypt.encrypt(msg);
+      return result;
+    }
+
+    function decrypt(msg, privateKey) {
+         const decrypt = new JSEncrypt();
+         decrypt.setPrivateKey(privateKey);
+         const result = decrypt.decrypt(msg);
+
     }
 
 });
