@@ -23,11 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
           console.log(room == data.room2)
          if (room !== data.room && room !== data.room2 ){
              const p = document.getElementById('p_'+data.from);
-            const span = document.createElement('span');
-            span.setAttribute("class","badge" );
-            span.setAttribute("id","bd_"+data.from );
-            span.innerHTML = 1;
-            p.append(span);
+             const badge = document.getElementById("bd_"+data.from);
+             if (badge){
+                 badge.innerHTML = parseInt(badge.innerHTML) + 1;
+             }else {
+                   const span = document.createElement('span');
+                   span.setAttribute("class","badge" );
+                   span.setAttribute("id","bd_"+data.from );
+                   span.innerHTML = 1;
+                   p.append(span);
+             }
+
          }
     });
     // Display all incoming messages
