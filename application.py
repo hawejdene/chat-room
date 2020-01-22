@@ -103,45 +103,17 @@ def connect(data):
 
 @socketio.on('message')
 def message(data):
-    print(data)
-    room = data['room']
     destination = ''
     if 'destination' in data:
         destination = data['destination']
     msg = {"msg": data['msg'], "username": data['username']}
-    # newRoom2 = room.split('_')[1] + '_' + room.split('_')[0]
     userRoom = destination + '_' + destination
-    if not messages or (room not in messages):
-        messages[room] = []
-        messages[room].append(msg)
-    else:
-        messages[room].append(msg)
-
-    send({"username": data['username'], "msg": data['msg'], 'all_messages': messages[room], 'room': room}, room=room)
     emit('notification',
-         {"from": data['username'], "room": room, "room2": room, "msg": "new message", 'clients': clients},
+         {"from": data['username'], "msg": data['msg'], 'clients': clients},
          room=userRoom)
 
 
-@socketio.on('join-user')
-def message(data):
-    # user join room user_userTo
-    user = data["username"]
-    userTo = data["to"]
-    newRoom = checkRoom(user, userTo)
-    join_room(newRoom)
-    if newRoom in messages:
-        send({"username": data['username'], "msg": "load message", 'all_messages': messages[newRoom]}, room=newRoom)
 
-
-def checkRoom(user1, user2):
-    print(user1, user2)
-    print(user1 > user2)
-    if user1 > user2:
-        newRoom = user1 + '_' + user2
-    else:
-        newRoom = user2 + '_' + user1
-    return newRoom
 
 
 if __name__ == "__main__":
