@@ -4,28 +4,40 @@ document.addEventListener('DOMContentLoaded', () => {
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
     var pki = forge.pki;
     var messages = {};
-
+    var clients = [];
     // Retrieve username
     const username = document.querySelector('#get-username').innerHTML;
-
+    //Retrieve certification
+    const myCertification = document.getElementById("certification").innerHTML;
     // Set default room
     let room = username + "_" + username;
     let destination = username;
+    let destinationCertificate = myCertification;
 
 
     socket.on('connect', function () {
-        const req = createCertifRequest();
-        console.log(req)
-        socket.emit('connect-user', {'username': username, 'room': room, 'req':req});
+        socket.emit('connect-user', {'username': username, 'room': room,  'certification':myCertification});
     });
+
+
+
     //new message
     socket.on('notification', data => {
         //decrypt message
+        //get private key
+        const private =window.localStorage.getItem("private_key");
+         console.log("private key")
+        console.log(private)
+        const private2 =pki.privateKeyFromPem(private)
+        console.log("private key")
+        console.log(private2)
+        //decrypt message
+         var decrypted = private2.decrypt(data.msg)
         if (data["from"] in messages) {
-            messages[data["from"]].push({'sender': data["from"], 'msg': data.msg})
+            messages[data["from"]].push({'sender': data["from"], 'msg': decrypted})
         } else {
             messages[data["from"]] = []
-            messages[data["from"]].push({'sender': data["from"], 'msg': data.msg})
+            messages[data["from"]].push({'sender': data["from"], 'msg': decrypted})
         }
 
         if (destination !== data["from"]) {
@@ -90,16 +102,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function populateClients(data) {
         document.querySelector('#sidebar').innerHTML = "";
         for (var i = 0; i < data.clients.length; i++) {
-            if (data.clients[i] !== username) {
+            if (data.clients[i]['username'] !== username) {
                 const p = document.createElement('p');
                 const span = document.createElement('span');
+                const hiddenCertif = document.createElement('span');
                 p.setAttribute("class", "notification select-room cursor-pointer");
-                p.setAttribute("id", 'p_' + data.clients[i]);
-                span.setAttribute("id", data.clients[i]);
-                span.innerHTML = data.clients[i];
+                p.setAttribute("id", 'p_' + data.clients[i]['username']);
+                span.setAttribute("id", data.clients[i]['username']);
+                span.innerHTML = data.clients[i]['username'] ;
                 p.append(span);
                 span.addEventListener("click", function () {
-                    sendMessageTo(span.innerHTML)
+                    clients.forEach(client => {
+                        if (client.username == span.innerHTML) {
+                             sendMessageTo(span.innerHTML, client.certification)
+                        }
+                    })
                 });
                 document.querySelector('#sidebar').append(p);
             }
@@ -109,11 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     socket.on('new-user', data => {
-        populateClients(data)
+        populateClients(data);
+        clients = data.clients;
     });
 
     socket.on('leave-user', data => {
-        populateClients(data)
+        populateClients(data);
+        clients = data.clients;
     });
 
 
@@ -127,9 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
             messages[destination].push({'sender': username, 'msg': msg});
         }
         populateMessages(messages[destination]);
+        const certPem = forge.pki.certificateFromPem(destinationCertificate);
+
         //encrypt message with public key of sender
+        var encrypted = certPem.publicKey.encrypt(msg);
+
         socket.emit('message', {
-            'msg': document.querySelector('#user_message').value,
+            'msg': encrypted,
             'username': username, 'destination': destination, 'room': room
         });
 
@@ -141,10 +164,22 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.emit('leave-app', {'username': username, 'room': room});
     };
 
+   /* function encrypt(msg, pubKey) {
+      const encrypt = new JSEncrypt();
+      encrypt.setPublicKey(pubKey);
+      const result = encrypt.encrypt(msg);
+      return result;
+    }
+    function decrypt(msg, privateKey) {
+         const decrypt = new JSEncrypt();
+         decrypt.setPrivateKey(privateKey);
+         const result = decrypt.decrypt(msg);*/
 
-    function sendMessageTo(user) {
+
+    function sendMessageTo(user, certification) {
 
         destination = user;
+        destinationCertificate = certification;
         document.querySelectorAll('.select-room').forEach(p => {
             p.style.color = "black";
         });
@@ -190,62 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector("#user_message").focus();
     }
 
-    /*  function generateKeys() {
-      const keySize = 2048;
-      const crypt = new JSEncrypt({default_key_size: keySize});
-
-      crypt.getKey();
-      console.log("public key: ",crypt.getPrivateKey());
-      console.log("private key: ", crypt.getPrivateKey());
-
-    }
-
-     function encrypt(msg, pubKey) {
-      const encrypt = new JSEncrypt();
-      encrypt.setPublicKey(pubKey);
-      const result = encrypt.encrypt(msg);
-      return result;
-    }
-
-    function decrypt(msg, privateKey) {
-         const decrypt = new JSEncrypt();
-         decrypt.setPrivateKey(privateKey);
-         const result = decrypt.decrypt(msg);
-
-    }  */
 
 
-    function createCertifRequest() {
-        var keys = pki.rsa.generateKeyPair(2048);
-        let certificationRequest = pki.createCertificationRequest();
-        console.log(certificationRequest);
-        certificationRequest.publicKey = keys.publicKey;
-        var attrs = [{
-            name: 'commonName',
-            value: 'insat.org'
-        }, {
-            name: 'countryName',
-            value: 'TN'
-        }, {
-            shortName: 'ST',
-            value: 'Tunis'
-        }, {
-            name: 'localityName',
-            value: 'Blacksburg'
-        }, {
-            name: 'organizationName',
-            value: 'Test'
-        }, {
-            shortName: 'OU',
-            value: 'Test'
-        }];
-        certificationRequest.setSubject(attrs);
-        certificationRequest.sign(keys.privateKey);
 
-        let certificationRequestToPem = pki.certificationRequestToPem(certificationRequest);
-        console.log(certificationRequestToPem);
-        return certificationRequestToPem;
-    }
 });
 
 

@@ -80,7 +80,10 @@ def chat():
     if not current_user.is_authenticated:
         flash(' please login', 'danger')
         # return redirect(url_for('login'))
-    return render_template("chat.html", username=current_user.username, clients=clients)
+        # get certificate
+    myCertif = open("E:\\GL4\\my_keys\certif_"+current_user.username+".pem", 'rb').read().decode("utf-8")
+    print("myy cerf")
+    return render_template("chat.html", username=current_user.username, clients=clients, myCertif=myCertif)
 
 
 @app.route("/logout", methods=['GET', 'POST'])
@@ -94,15 +97,18 @@ def logout():
 def connect(data):
     username = data["username"]
     room = data["room"]
+    certification = data["certification"]
     join_room(room)
-    if username not in clients:
-        clients.append(username)
+    index = 0
+    for i in range(len(clients)):
+        if clients[i]['username'] == username:
+            pass
+            break
+        index = index +1
+    if index == len(clients):
+        clients.append({'username': username, 'certification': certification})
+    print(index, len(clients))
     # Broadcast that new user has joined
-    print(data['req'])
-    with open("E:\\GL4\\my_keys\\demande.pem", "wb") as f:
-         f.write(bytes(data['req'], 'utf-8'))
-    test = signRequestCSR()
-    print(test)
     emit('new-user', {'username': username, 'room': room, 'clients': clients}, broadcast=True)
 
 
@@ -110,8 +116,10 @@ def connect(data):
 def connect(data):
     username = data["username"]
     room = data["room"]
-    if username in clients:
-        clients.remove(current_user.username)
+    for i in range(len(clients)):
+        if clients[i]['username'] == username:
+            del clients[i]
+            break
     # Broadcast that new user has left
     emit('leave-user', {'username': username, 'room': room, 'clients': clients}, broadcast=True)
 

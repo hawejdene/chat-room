@@ -11,13 +11,13 @@
         {{ displayField(form.username, 'Username', autocomplete="off", autofocus=true) }}
         {{ displayField(form.password, 'Password') }}
         <div class="form-group">
-            <input id="login" value="Login" class="btn btn-warning">
+            <input type="submit" id="login" value="Login" class="btn btn-warning">
         </div>
         {{ form.csrf_token }}
     </form>
 
     <hr>
-<span style="display:none" ></span>
+<span style="display:none" id="certification" >{{certification}}</span>
     <p>Have not registered? <a href={{url_for('register')}}>Register here</a>.</p>
 <script type="text/javascript" src="../static/scripts/login.js"></script>
 {% endblock %}
