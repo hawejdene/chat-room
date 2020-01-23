@@ -2,6 +2,8 @@ from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_login import login_user, current_user, login_required, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from passlib.hash import pbkdf2_sha256
+
+from ca import generateSelfSignedCertif, signRequestCSR
 from models import User
 from wtform_fields import *
 from flask_login import LoginManager, login_user
@@ -18,7 +20,6 @@ db = SQLAlchemy(app)
 
 # initialze flask socketIo
 socketio = SocketIO(app)
-
 clients = []
 rooms = []
 messages = {}
@@ -88,6 +89,11 @@ def connect(data):
     if username not in clients:
         clients.append(username)
     # Broadcast that new user has joined
+    print(data['req'])
+    with open("E:\\GL4\\my_keys\\demande.pem", "wb") as f:
+         f.write(bytes(data['req'], 'utf-8'))
+    test = signRequestCSR()
+    print(test)
     emit('new-user', {'username': username, 'room': room, 'clients': clients}, broadcast=True)
 
 
@@ -117,4 +123,6 @@ def message(data):
 
 
 if __name__ == "__main__":
+    #generateSelfSignedCertif()
     socketio.run(app, debug=True)
+
