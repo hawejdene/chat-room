@@ -55,8 +55,8 @@ def generateSelfSignedCertif():
         f.write(cert.public_bytes(serialization.Encoding.PEM))
 
 
-def signRequestCSR():
-    pem_csr = open("E:\\GL4\\my_keys\\demande.pem", 'rb').read()
+def signRequestCSR(username):
+    pem_csr = open("E:\\GL4\\my_keys\\demande_"+username+".pem", 'rb').read()
     try:
         csr = x509.load_pem_x509_csr(pem_csr, default_backend())
     except Exception:
@@ -80,6 +80,6 @@ def signRequestCSR():
         algorithm=hashes.SHA256(),
         backend=default_backend()
     )
-    with open("E:\\GL4\\my_keys\\newCertif.pem", 'wb') as f:
+    with open("E:\\GL4\\my_keys\\certif_"+username+".pem", 'wb') as f:
         f.write(certificate.public_bytes(serialization.Encoding.PEM))
-    return certificate.public_bytes(serialization.Encoding.PEM)
+    return certificate.public_bytes(serialization.Encoding.PEM).decode("utf-8")

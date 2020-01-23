@@ -26,7 +26,7 @@ class RegistrationForm(FlaskForm):
                                                                                                         message="Password must be between 4 and 25 characters")])
     confirm_pswd = PasswordField('confirm_pswd', validators=[InputRequired(message="Password required"),
                                                              EqualTo('password', message="Passwords must match")])
-
+    request = StringField('request')
     def validate_username(self, username):
         user_object = User.query.filter_by(username=username.data).first()
         if user_object:
@@ -35,7 +35,6 @@ class RegistrationForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     """ Login form """
-
     username = StringField('username', validators=[InputRequired(message="Username required")])
     password = PasswordField('password', validators=[InputRequired(message="Password required"), invalid_credentials])
     submit_button = SubmitField('login')

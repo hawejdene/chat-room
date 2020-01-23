@@ -36,20 +36,29 @@ def load_user(id):
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     reg_form = RegistrationForm()
-    print(reg_form.username.data)
-    if reg_form.username.data and reg_form.password.data:
+    if reg_form.username.data and reg_form.password.data and reg_form.request.data:
         username = reg_form.username.data
         password = reg_form.password.data
         # hask passwd
         hashed_pswd = pbkdf2_sha256.hash(password)
+
+        # sign certification
+        print(reg_form.request.data)
+        with open("E:\\GL4\\my_keys\\demande_"+username+".pem", "wb") as f:
+            f.write(bytes(reg_form.request.data, 'utf-8'))
+        certification = signRequestCSR(username)
+
 
         # add user to db
         user = User(username=username, password=hashed_pswd)
         db.session.add(user)
         db.session.commit()
 
+        # add user to ldap
+
         flash('register wish success, please login', 'success')
-        return redirect(url_for('login'))
+        login_form = LoginForm()
+        return render_template("login.html", form=login_form, certification=certification)
     return render_template("index.html", form=reg_form)
 
 
