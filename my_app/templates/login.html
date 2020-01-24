@@ -1,0 +1,48 @@
+{% from 'field-macro.html' import displayField %}
+{% extends "prelogin-layout.html" %}
+
+{% block title %}Login {% endblock %}
+
+{% block content %}
+<h2>Login now!</h2>
+<p>Enter you username/password to start </p>
+<div class="container">
+    <div class="row">
+        <div class="col"></div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <form id="form" action="{{ url_for('login') }}" , method="POST">
+                <input type="hidden" id="certification" name="certification" class="certification">
+                {{ displayField(form.username, 'Username', autocomplete="off", autofocus=true) }}
+                {{ displayField(form.password, 'Password') }}
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                        </div>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="myCertif"
+                                   aria-describedby="inputGroupFileAddon01">
+                            <label class="custom-file-label" for="myCertif">Upload certification x509</label>
+                        </div>
+                    </div>
+                </div>
+                <span style="display:none" id="output"></span>
+                <div class="form-group">
+                    <input type="button" id="login" value="Login" class="btn btn-warning">
+                </div>
+                {{ form.csrf_token }}
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<hr>
+
+<p>Have not registered? <a href={{url_for('register')}}>Register here</a>.</p>
+<script type="text/javascript" src="../static/scripts/login.js"></script>
+{% endblock %}
+
+

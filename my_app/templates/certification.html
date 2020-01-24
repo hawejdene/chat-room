@@ -1,0 +1,23 @@
+{% from 'field-macro.html' import displayField %}
+{% extends "prelogin-layout.html" %}
+
+{% block title %}Download Certification{% endblock %}
+
+{% block content %}
+    <h2>Get your signed certification!</h2>
+<div class="row">
+    <div class="col" id="certification">{{certification}}</div>
+    <div class="col">
+        <div class="form-group">
+            <input id="download" value="Download" class="btn btn-warning">
+        </div>
+    </div>
+</div>
+
+    <hr>
+
+    <p>login here <a href={{url_for('login')}}>login here</a>.</p>
+<script type="text/javascript" src="../static/scripts/download.js"></script>
+{% endblock %}
+
+
