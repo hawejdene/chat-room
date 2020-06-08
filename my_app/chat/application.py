@@ -50,7 +50,7 @@ def register():
             user = User(username=username)
             db.session.add(user)
             db.session.commit()
-            flash('register wish success, please login you can also download your signed certification', 'success')
+            flash('register wish success, please download your signed certification', 'success')
             return render_template('certification.html', certification=certification)
 
         else:

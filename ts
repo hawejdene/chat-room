@@ -1,0 +1,14 @@
+  string l_SQL = "";
+            string l_Where = "";
+            decimal l_steigLM_VJ = 0;
+            decimal l_steigLM_VJG = 0;
+            decimal l_steigPR_VJG = 0;
+            decimal l_SumLM = 0;
+            decimal l_SumPR = 0;
+            decimal l_SumLM_ST = 0;
+            decimal l_SumPR_ST = 0;
+            decimal l_SumLM_MU_ST  = 0;
+            decimal l_SumPR_MU_ST = 0;
+            decimal l_UM_GR_TYP_VJ = 0;
+            int l_KZ_STEIGTYP = 0;
+            decimal l_BTE_NR = 0;
